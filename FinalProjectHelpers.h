@@ -19,7 +19,7 @@ void DisplayRules() {
 	printf("		But when you do, you are rewarded factorially!\n");
 	printf("\n");
 	
-	// TODO: Display scenarios for how these actually work
+	printf("Examples of pooled machine results");
 	printf("	Partial Winner:\n");
 	printf("		|201|012|111|\n");
 	printf("			These three machines pooled together would be a partial winner.\n");
@@ -27,8 +27,8 @@ void DisplayRules() {
 	printf("			the prize is divided by the total number of machines in the pool.\n");
 	printf("	Turbo Winner:\n");
 	printf("		|222|000|111|\n");
-	printf("			When all pooled machines are winners\n");
-	printf("\n");
+	printf("			When all pooled machines are winners of different symbols, then\n");
+	printf("			all prizes are doubled!\n");
 	printf("\n");
 	printf("	Turbo Jackpot:\n");
 	printf("		|111|111|111|\n");

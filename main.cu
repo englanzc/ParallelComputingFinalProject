@@ -134,21 +134,27 @@ int main( void ) {
 	HANDLE_ERROR(cudaMemcpy(resultsArray, dev_resultsArray, totalThreads * sizeof(unsigned int), cudaMemcpyDeviceToHost));
 	
 	int gamesWon = 0;
+	int gamesLost = 0;
 	int zeroWinners = 0;
 	int oneWinners = 0;
 	int twoWinners = 0;
+	int totalWinnings = 0;
 	for (int k = 0; k < totalThreads; k++) {
 		//printf("%i ", resultsArray[k]);
 		if (resultsArray[k] > 0) gamesWon++;
+		if (resultsArray[k] == 0) gamesLost++;
 		if (resultsArray[k] == 3) zeroWinners++;
 		if (resultsArray[k] == 10) oneWinners++;
 		if (resultsArray[k] == 50) twoWinners++;
+		totalWinnings += resultsArray[k];
 	}
 	printf("\n");
 	printf("Number of machines that were winners: %i\n", gamesWon);
+	printf("Number of machines that were losers: %i\n", gamesLost);
 	printf("Number of zero winners: %i\n", zeroWinners);
 	printf("Number of one winners: %i\n", oneWinners);
 	printf("Number of two winners: %i\n", twoWinners);
+	printf("Total winnings: %i", totalWinnings);
 	
 	// OUTPUT RESULTS
 	//printf("Number of winnings machines: %i\nNumber of losing machines: %i\nMoney gained/lost: %i", wonMachines, lostMachines, -1 * moneySpent + moneyWon);
