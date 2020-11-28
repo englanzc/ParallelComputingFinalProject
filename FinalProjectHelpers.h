@@ -40,28 +40,47 @@ void DisplayRules() {
 	printf("\n");
 }
 
-int GetNumberOfMachinesInput(char* playerInput) {
+int GetNumberOfMachinesInput(char* playerInput, int currentMoney) {
 	int numSlotMachines = 1;
-	while(numSlotMachines % 1000 != 0) {
+	while(numSlotMachines % 1000 != 0 || numSlotMachines > currentMoney) {
 		printf("How many Turbo Slot Machines would you like to play (by 1000s): ");
 		scanf("%s", playerInput);
 		numSlotMachines = strtol(playerInput, (char **)NULL, 10);
-		if (numSlotMachines % 1000 != 0) printf("%d is not a valid number of machines, try something like (3000).\n", numSlotMachines);
+		if (numSlotMachines % 1000 != 0) printf("%d is not a valid number of machines, try a multiple of 1000.\n", numSlotMachines);
+		if (numSlotMachines > currentMoney) printf("You only have %i money, please enter a number of machines less than or equal to %i.\n", currentMoney, currentMoney);
 	}
 	
 	printf("Please wait while we prepare your %d machines.\n", numSlotMachines);
 	return numSlotMachines;
 }
 
-int GetUserPoolingMachinesInput(char* playerInput) {
+int GetUserPoolingMachinesInput() {
 	char answer = ' ';
 	int error = 0;
 	while(answer != 'y' && answer != 'n' && answer != 'Y' && answer != 'N') {
 		if (error) printf("\n%c is not a valid answer. Try again.\n", answer);
-		printf("Would you like to pool your machines? Y/N: ");
+		printf("Would you like to pool your machines? (Y/N): ");
 		scanf("%c", &answer);
 		error++;
 	}
+	
+	if (answer == 'y' || answer == 'Y') return 1;
+	
+	return 0;
+}
+
+int GetUserPlayAgainInput() {
+	char answer = ' ';
+	int error = 0;
+	while(answer != 'y' && answer != 'n' && answer != 'Y' && answer != 'N') {
+		if (error) printf("\n%c is not a valid answer. Try again.\n", answer);
+		printf("Would you like to keep playing? (Y/N): ");
+		scanf("%c", &answer);
+		error++;
+	}
+	
+	if (answer == 'y' || answer == 'Y') return 1;
+	
 	return 0;
 }
 
