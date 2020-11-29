@@ -3,7 +3,9 @@
 #include <curand_kernel.h>
 #include <cuda.h>
 #include <time.h>
+#include <string.h>
 #include "book.h"
+#include "gputimer.h"
 #include "FinalProjectHelpers.h"
 
 
@@ -69,18 +71,12 @@ __global__ void PoolingKernel(curandState *state, unsigned int *resultsArray, in
 	// TODO: Similar to the NonPoolingKernel, but each block will have a thread for each machine in the pool and need to coordinate data
 }
 
-int main( void ) {
-	PrintEmptyLines(50);
+void PlayGame(int isDebug) {
+	GpuTimer timer;
 	
-	// Game intro and explanation
-	printf("Welcome to Turbo Gambling!\n\n");
-	printf("Most of our services are under construction. The only game available is Turbo Slot Machines\n");
+	// At least my hardware cannot handle one million machines, based upon our implementation
+	int currentMoney = 100000;
 	
-	DisplayRules();
-	
-	int currentMoney = 5000;
-	
-	// START GAME (LOOP)
 	while(1) {
 		if (currentMoney < 1000) {
 			printf("You do not have sufficient funds. Thanks for playing Turbo Slots!");
@@ -143,7 +139,9 @@ int main( void ) {
 			PoolingKernel<<<blocks, threads>>>(devStates, dev_resultsArray, MACHINES_BY_FIVE_HUNDREDS);
 		}
 		else {
+			timer.Start();
 			NonPoolingKernel<<<blocks, threads>>>(devStates, dev_resultsArray, MACHINES_BY_FIVE_HUNDREDS);
+			timer.Stop();
 		}
 		
 		HANDLE_ERROR(cudaMemcpy(resultsArray, dev_resultsArray, totalThreads * sizeof(unsigned int), cudaMemcpyDeviceToHost));
@@ -175,6 +173,7 @@ int main( void ) {
 		
 		currentMoney += totalWinnings;
 		
+		if (isDebug) { printf("The machines took %g ms\n", timer.Elapsed()); }
 		
 		// CLEAN-UP
 		free(resultsArray);
@@ -190,11 +189,58 @@ int main( void ) {
 		int doesUserWantToPlayAgain = GetUserPlayAgainInput();
 		if (doesUserWantToPlayAgain == 0) {
 			printf("\n");
-			printf("Thanks for playing Turbo Slots!\n");
+			printf("Thanks for playing Turbo Slots!\n\n");
 			printf("You ended your session with %i money!", currentMoney);
 			break;
 		}
+		else { printf("\n"); }
 	}
+}
+
+int main(int argc, char *argv[]) {
+	int isDebug = 0;
+	if (argc > 2) {
+		printf("This program accepts only zero arguments. Please run again without any arguments\n");
+		return 0;
+	}
+	else if (argc == 2 && strcmp(argv[1], "debug") == 0) {
+		isDebug = 1;
+	}
+	else if (argc == 2) { 
+		printf("This program accepts only zero arguments. Please run again without any arguments\n");
+		return 0;
+	}
+	
+	if (isDebug) {
+		int nDevices;
+
+		cudaGetDeviceCount(&nDevices);
+		for (int i = 0; i < nDevices; i++) {
+			cudaDeviceProp prop;
+			cudaGetDeviceProperties(&prop, i);
+			printf("\n");
+			printf("Device Number: %d\n", i);
+			printf("  Device name: %s\n", prop.name);
+			printf("  Memory Clock Rate (KHz): %d\n",
+				   prop.memoryClockRate);
+			printf("  Memory Bus Width (bits): %d\n",
+				   prop.memoryBusWidth);
+			printf("  Peak Memory Bandwidth (GB/s): %f\n\n",
+				   2.0*prop.memoryClockRate*(prop.memoryBusWidth/8)/1.0e6);
+		}
+	}
+	
+	PrintEmptyLines(25);
+	
+	// Game intro and explanation
+	printf("Welcome to Turbo Gambling!\n\n");
+	printf("Most of our services are under construction. The only game available is Turbo Slot Machines\n");
+	
+	DisplayRules();
+
+	
+	// START GAME (LOOP)
+	PlayGame(isDebug);
 
 	/*
 	HIGH LEVEL TODO LIST

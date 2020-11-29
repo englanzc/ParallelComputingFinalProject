@@ -50,7 +50,7 @@ int GetNumberOfMachinesInput(char* playerInput, int currentMoney) {
 		if (numSlotMachines > currentMoney) printf("You only have %i money, please enter a number of machines less than or equal to %i.\n", currentMoney, currentMoney);
 	}
 	
-	printf("Please wait while we prepare your %d machines.\n", numSlotMachines);
+	printf("Please wait while we prepare your %d machines.\n\n", numSlotMachines);
 	return numSlotMachines;
 }
 
