@@ -105,10 +105,7 @@ void PlayGame(int isDebug) {
 		const unsigned int totalThreads = MACHINES_BY_FIVE_HUNDREDS * 500;
 		
 		curandState *devStates;
-		unsigned int *devResults, *hostResults;
-		
-		// Allocate space for results on host
-		hostResults = (unsigned int *)calloc(totalThreads, sizeof(int));
+		unsigned int *devResults;
 
 		// Allocate space for results on device
 		HANDLE_ERROR(cudaMalloc((void **)&devResults, totalThreads * sizeof(unsigned int)));
@@ -120,9 +117,9 @@ void PlayGame(int isDebug) {
 		
 
 		// Initialize Host and Device arrays
-		//printf("Size: %i \n", totalThreads);
+		if (isDebug) { printf("Size: %i \n", totalThreads); }
 		unsigned int numbytes = totalThreads * sizeof(unsigned int);
-		//printf("Numbytes: %i \n", numbytes);
+		if (isDebug) { printf("Numbytes: %i \n", numbytes); }
 		unsigned int *resultsArray = (unsigned int *) malloc(numbytes);
 		unsigned int *dev_resultsArray = 0;
 		
@@ -132,16 +129,68 @@ void PlayGame(int isDebug) {
 		
 		setup_kernel<<<blocks, threads>>>(devStates, seconds);
 		
-		// TODO: Setup some timing data tracking shit
-		
-		// If Pool then Player Input for how to partition them
+		// Execute respective kernel
 		if (isUserPoolingMachines) {
+			// TODO: Get player input on how they want to partition their machines. How many machines to concatenate.
+			timer.Start();
 			PoolingKernel<<<blocks, threads>>>(devStates, dev_resultsArray, MACHINES_BY_FIVE_HUNDREDS);
+			timer.Stop();
 		}
 		else {
 			timer.Start();
 			NonPoolingKernel<<<blocks, threads>>>(devStates, dev_resultsArray, MACHINES_BY_FIVE_HUNDREDS);
 			timer.Stop();
+		}
+		
+		// Sequential
+		if (isDebug) {
+			// TODO: Sequential Implementation of both kernels. I think it might be best to keep as much of your code right here and
+			// 			probably initialize new variables just for this. -ZE
+			
+			// Initialize Variables
+			/*
+			unsigned int seqNumBytes = totalThreads * sizeof(unsigned int);
+			unsigned int *seqResultsArray = (unsigned int *) malloc(seqNumBytes);
+			*/
+			
+			// Execute respective sequential implementation
+			if (isUserPoolingMachines) {
+				
+			}
+			else { // Non-pooling
+				
+			}
+			
+			// OUTPUT RESULTS
+			/*
+			int gamesWon = 0;
+			int gamesLost = 0;
+			int zeroWinners = 0;
+			int oneWinners = 0;
+			int twoWinners = 0;
+			int totalWinnings = 0;
+			for (int k = 0; k < totalThreads; k++) {
+				//printf("%i ", seqResultsArray[k]);
+				if (seqResultsArray[k] > 0) gamesWon++;
+				if (seqResultsArray[k] == 0) gamesLost++;
+				if (seqResultsArray[k] == 3) zeroWinners++;
+				if (seqResultsArray[k] == 10) oneWinners++;
+				if (seqResultsArray[k] == 50) twoWinners++;
+				totalWinnings += seqResultsArray[k];
+			}
+			printf("\n");
+			printf("Number of machines that were winners: %i\n", gamesWon);
+			printf("Number of machines that were losers: %i\n", gamesLost);
+			printf("Number of zero winners: %i\n", zeroWinners);
+			printf("Number of one winners: %i\n", oneWinners);
+			printf("Number of two winners: %i\n", twoWinners);
+			printf("Total winnings: %i\n", totalWinnings);
+			*/
+			
+			// CLEAN-UP
+			/*
+			free(seqResultsArray);
+			*/
 		}
 		
 		HANDLE_ERROR(cudaMemcpy(resultsArray, dev_resultsArray, totalThreads * sizeof(unsigned int), cudaMemcpyDeviceToHost));
@@ -181,7 +230,6 @@ void PlayGame(int isDebug) {
 		
 		HANDLE_ERROR(cudaFree(devStates));
 		HANDLE_ERROR(cudaFree(devResults));
-		free(hostResults);
 		
 		// The player pressing Enter for the previous input is read in the next input handling as ' ' for some reason...
 		scanf("%c", playerInput);
