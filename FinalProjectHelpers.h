@@ -54,7 +54,7 @@ int GetNumberOfMachinesInput(char* playerInput, int currentMoney) {
 	return numSlotMachines;
 }
 
-int GetUserPoolingMachinesInput() {
+int GetIsUserPoolingMachinesInput() {
 	char answer = ' ';
 	int error = 0;
 	while(answer != 'y' && answer != 'n' && answer != 'Y' && answer != 'N') {
@@ -67,6 +67,20 @@ int GetUserPoolingMachinesInput() {
 	if (answer == 'y' || answer == 'Y') return 1;
 	
 	return 0;
+}
+
+int GetPartitionInput(char* playerInput) {
+	int partition = 0;
+	while(partition <= 1 || 1000 % partition != 0) {
+		printf("How would you like to pool your machines? (1000 %% partition must equal 0): ");
+		scanf("%s", playerInput);
+		partition = strtol(playerInput, (char **)NULL, 10);
+		if (1000 % partition != 0) printf("%d is not a valid pool value for your machines, try a partition that goes into 1000 evenly.\n", partition);
+		if (partition <= 1) printf("%d is not a valid pool value for your machines, must be greater than 1", partition);
+	}
+	
+	printf("You chose to group machines by %is.\n\n", partition);
+	return partition;
 }
 
 int GetUserPlayAgainInput() {
